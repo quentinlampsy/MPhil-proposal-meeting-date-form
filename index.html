@@ -192,6 +192,49 @@
     .success-title { font-size: 26px; font-weight: 400; margin-bottom: 10px; }
     .success-body  { font-size: 14px; color: #5f6368; line-height: 1.6; }
 
+    /* ── Review card (already submitted / just submitted) ───── */
+    #review-card {
+      display: none;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.1), 0 1px 3px rgba(0,0,0,.08);
+    }
+    .review-accent { height: 8px; background: #43a047; }
+    .review-body   { padding: 28px 24px 32px; }
+    .review-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 24px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid #e8eaed;
+    }
+    .review-header-icon { font-size: 32px; line-height: 1; }
+    .review-header-text h2 { font-size: 22px; font-weight: 400; color: #202124; }
+    .review-header-text p  { font-size: 13px; color: #5f6368; margin-top: 4px; }
+    .review-section { margin-bottom: 20px; }
+    .review-section:last-child { margin-bottom: 0; }
+    .review-section-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: #80868b;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .review-section-value { font-size: 14px; color: #202124; line-height: 1.7; }
+    .slot-tag {
+      display: inline-block;
+      background: #ede7f6;
+      color: #4a148c;
+      border-radius: 12px;
+      padding: 4px 11px;
+      font-size: 13px;
+      margin: 3px 4px 3px 0;
+    }
+
     /* ── Footer ─────────────────────────────────────────────── */
     .footer {
       text-align: center;
@@ -216,7 +259,7 @@
         <p>Dear Professor,</p>
         <p>
           I am <strong>Tak Kwan Quentin Lam</strong>. I am writing to invite you to my
-          MPhil proposal presentation and kindly ask for your availability. Please indicate
+          MPhil proposal presentation and kindly ask for your availability in <strong>June</strong>. Please indicate
           all the time slots that work for you and your preferred meeting format.
         </p>
         <p>Thank you very much for your time and support.</p>
@@ -246,7 +289,7 @@
         aria-readonly="true"
         value="Loading…"
       />
-      <p class="field-hint">This field is pre-filled based on your unique link and cannot be changed.</p>
+      <p class="field-hint">Every committee member has a unique link to ensure their responses are correctly attributed. Please let me know if it's not your link.</p>
       <div id="unknown-warning" class="unknown-warning" role="alert">
         ⚠️ This link does not contain a valid recipient identifier. Please use the personalised link sent to you by Tak Kwan Quentin Lam.
       </div>
@@ -293,8 +336,34 @@
 
   </form>
 
-  <!-- ── Success card ───────────────────────────────────────── -->
-  <div id="success-card" class="success-card" role="region" aria-live="polite">
+  <!-- ── Already-submitted / just-submitted review card ──────── -->
+  <div id="review-card" role="region" aria-live="polite">
+    <div class="review-accent"></div>
+    <div class="review-body">
+      <div class="review-header">
+        <div class="review-header-icon" id="review-icon">📋</div>
+        <div class="review-header-text">
+          <h2 id="review-title">Your response has been submitted!</h2>
+          <p id="review-date"></p>
+        </div>
+      </div>
+      <div class="review-section">
+        <div class="review-section-label">Name</div>
+        <div class="review-section-value" id="review-name"></div>
+      </div>
+      <div class="review-section">
+        <div class="review-section-label">Available time slots you selected</div>
+        <div class="review-section-value" id="review-slots"></div>
+      </div>
+      <div class="review-section">
+        <div class="review-section-label">Meeting format preference</div>
+        <div class="review-section-value" id="review-format"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Legacy success card (kept for fallback) ───────────────── -->
+  <div id="success-card" class="success-card" style="display:none" role="region" aria-live="polite">
     <div class="success-icon">✅</div>
     <h2 class="success-title">Response submitted!</h2>
     <p class="success-body" id="success-body"></p>
@@ -312,16 +381,17 @@
      ================================================================ */
 
   /**
-   * Formspree endpoint.
+   * Formspree endpoint — send responses to quentinlampsy@gmail.com
    *
-   * Steps:
-   *  1. Go to https://formspree.io and create a free account.
-   *  2. Create a new form (choose "New Form" → give it a name).
-   *  3. Copy the endpoint URL that looks like:
+   * One-time setup steps:
+   *  1. Go to https://formspree.io and sign up with quentinlampsy@gmail.com
+   *  2. Click "New Form", name it "MPhil Proposal Availability", keep the
+   *     email as quentinlampsy@gmail.com, and click Create.
+   *  3. Copy the endpoint URL shown — it looks like:
    *       https://formspree.io/f/xyzabcde
-   *  4. Replace the placeholder string below with your real URL.
+   *  4. Replace the placeholder string below with your real endpoint URL.
    */
-  const FORMSPREE_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID';
+  const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xpqodrge';
 
   /** Map from the URL ?p= parameter value to the professor's display name. */
   const RECIPIENTS = {
@@ -354,6 +424,7 @@
   (function init() {
     buildTimeSlots();
     prefillName();
+    checkPreviousSubmission();
   })();
 
   /* ----------------------------------------------------------------
@@ -466,14 +537,23 @@
         throw new Error(data.error || `HTTP ${res.status}`);
       }
 
-      // Show success
+      // Persist to localStorage so the link becomes read-only on return visits
+      const submissionData = {
+        name,
+        slots:       selectedSlots,
+        format:      formatRadio.value,
+        submittedAt: new Date().toISOString(),
+      };
+      const personKey = getPersonKey();
+      if (personKey) {
+        try { localStorage.setItem('mphil_submission_' + personKey, JSON.stringify(submissionData)); }
+        catch (e) { /* storage unavailable — not critical */ }
+      }
+
+      // Show the review card (new submission)
       document.getElementById('availability-form').style.display = 'none';
-      const successCard = document.getElementById('success-card');
-      document.getElementById('success-body').textContent =
-        `Thank you, ${name}. Your response has been recorded. ` +
-        `Tak Kwan Quentin Lam will follow up with you shortly regarding the confirmed meeting time.`;
-      successCard.style.display = 'block';
-      successCard.focus();
+      document.getElementById('error-banner').style.display = 'none';
+      showReviewCard(submissionData, true);
 
     } catch (err) {
       submitBtn.textContent = 'Submit';
@@ -492,6 +572,64 @@
   function getPersonKey() {
     const params = new URLSearchParams(window.location.search);
     return params.get('p') || params.get('person') || '';
+  }
+
+  /* ----------------------------------------------------------------
+     Check if this person already submitted (localStorage)
+  ---------------------------------------------------------------- */
+  function checkPreviousSubmission() {
+    const key = getPersonKey();
+    if (!key) return;
+    let stored;
+    try { stored = localStorage.getItem('mphil_submission_' + key); }
+    catch (e) { return; }
+    if (!stored) return;
+    try {
+      const data = JSON.parse(stored);
+      document.getElementById('availability-form').style.display = 'none';
+      document.getElementById('error-banner').style.display = 'none';
+      showReviewCard(data, false);
+    } catch (e) { /* corrupted data — let them fill again */ }
+  }
+
+  /* ----------------------------------------------------------------
+     Render the review card with submitted answers
+     isNew = true  → just submitted now
+     isNew = false → returning visit
+  ---------------------------------------------------------------- */
+  function showReviewCard(data, isNew) {
+    const card = document.getElementById('review-card');
+    card.style.display = 'block';
+
+    document.getElementById('review-icon').textContent  = isNew ? '✅' : '📋';
+    document.getElementById('review-title').textContent = isNew
+      ? 'Your response has been submitted!'
+      : 'You have already submitted this form';
+
+    const dateStr = data.submittedAt
+      ? 'Submitted on ' + new Date(data.submittedAt).toLocaleString(undefined, {
+          year: 'numeric', month: 'long', day: 'numeric',
+          hour: '2-digit', minute: '2-digit'
+        })
+      : '';
+    document.getElementById('review-date').textContent = dateStr;
+    document.getElementById('review-name').textContent = data.name || '—';
+
+    const slotsEl = document.getElementById('review-slots');
+    slotsEl.innerHTML = '';
+    if (data.slots && data.slots.length > 0) {
+      data.slots.forEach(slot => {
+        const tag = document.createElement('span');
+        tag.className = 'slot-tag';
+        tag.textContent = slot;
+        slotsEl.appendChild(tag);
+      });
+    } else {
+      slotsEl.textContent = '—';
+    }
+
+    document.getElementById('review-format').textContent = data.format || '—';
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function showError(msg) {
