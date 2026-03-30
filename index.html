@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MPhil Proposal Meeting – Availability Form</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: #ede7f6;
+      font-family: Roboto, Arial, sans-serif;
+      font-size: 14px;
+      color: #202124;
+      padding: 24px 16px 56px;
+      min-height: 100vh;
+    }
+
+    .form-container {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    /* ── Header card ─────────────────────────────────────────── */
+    .header-card {
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.1), 0 1px 3px rgba(0,0,0,.08);
+    }
+    .header-accent { height: 10px; background: #673ab7; }
+    .header-body   { padding: 24px 24px 28px; }
+    .header-title  { font-size: 32px; font-weight: 400; color: #202124; margin-bottom: 12px; line-height: 1.3; }
+    .header-desc   { font-size: 14px; color: #202124; line-height: 1.7; }
+    .header-desc p + p { margin-top: 10px; }
+    .required-note { color: #d93025; font-size: 13px; margin-top: 14px; }
+
+    /* ── Question card ───────────────────────────────────────── */
+    .question-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.1), 0 1px 3px rgba(0,0,0,.08);
+      border-left: 6px solid transparent;
+      transition: border-color .15s;
+    }
+    .question-card:focus-within { border-left-color: #673ab7; }
+
+    .question-label {
+      display: block;
+      font-size: 16px;
+      font-weight: 400;
+      color: #202124;
+      margin-bottom: 16px;
+    }
+    .required-star { color: #d93025; margin-left: 3px; }
+
+    /* ── Name input (disabled / pre-filled) ─────────────────── */
+    .text-input {
+      width: 100%;
+      border: none;
+      border-bottom: 1px dashed #bdc1c6;
+      padding: 8px 0;
+      font-family: inherit;
+      font-size: 14px;
+      color: #5f6368;
+      background: transparent;
+      outline: none;
+      cursor: default;
+    }
+    .field-hint {
+      font-size: 12px;
+      color: #80868b;
+      margin-top: 6px;
+    }
+    .unknown-warning {
+      display: none;
+      margin-top: 10px;
+      padding: 10px 14px;
+      background: #fce8e6;
+      border-radius: 4px;
+      color: #c5221f;
+      font-size: 13px;
+    }
+
+    /* ── Checkbox / Radio lists ──────────────────────────────── */
+    .option-list { display: flex; flex-direction: column; gap: 2px; }
+
+    .day-divider {
+      font-size: 12px;
+      font-weight: 500;
+      color: #5f6368;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+      padding: 14px 4px 6px;
+      border-bottom: 1px solid #e8eaed;
+      margin-bottom: 2px;
+    }
+    .day-divider:first-child { padding-top: 0; }
+
+    .option-row {
+      display: flex;
+      align-items: center;
+      padding: 9px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background .12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .option-row:hover { background: #f5f0fb; }
+
+    .option-row input[type="checkbox"],
+    .option-row input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      margin-right: 14px;
+      flex-shrink: 0;
+      cursor: pointer;
+      accent-color: #673ab7;
+    }
+    .option-row label {
+      font-size: 14px;
+      color: #202124;
+      cursor: pointer;
+      line-height: 1.4;
+    }
+
+    /* ── Error banner ────────────────────────────────────────── */
+    .error-banner {
+      display: none;
+      background: #fce8e6;
+      border-radius: 8px;
+      padding: 14px 18px;
+      color: #c5221f;
+      font-size: 13px;
+      margin-bottom: 12px;
+      border-left: 4px solid #d93025;
+    }
+
+    /* ── Submit row ──────────────────────────────────────────── */
+    .submit-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 4px 0 0;
+    }
+    .submit-btn {
+      background: #673ab7;
+      color: #fff;
+      border: none;
+      padding: 10px 28px;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: .25px;
+      cursor: pointer;
+      transition: background .18s, box-shadow .18s;
+    }
+    .submit-btn:hover:not(:disabled) {
+      background: #5e35b1;
+      box-shadow: 0 1px 3px rgba(0,0,0,.25);
+    }
+    .submit-btn:disabled { opacity: .65; cursor: not-allowed; }
+    .clear-link {
+      font-size: 14px;
+      color: #673ab7;
+      text-decoration: none;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: inherit;
+      padding: 4px 0;
+    }
+    .clear-link:hover { text-decoration: underline; }
+
+    /* ── Success card ────────────────────────────────────────── */
+    .success-card {
+      display: none;
+      background: #fff;
+      border-radius: 8px;
+      padding: 40px 24px;
+      text-align: center;
+      box-shadow: 0 1px 2px rgba(0,0,0,.1), 0 1px 3px rgba(0,0,0,.08);
+    }
+    .success-icon  { font-size: 52px; margin-bottom: 16px; }
+    .success-title { font-size: 26px; font-weight: 400; margin-bottom: 10px; }
+    .success-body  { font-size: 14px; color: #5f6368; line-height: 1.6; }
+
+    /* ── Review card (already submitted / just submitted) ───── */
+    #review-card {
+      display: none;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.1), 0 1px 3px rgba(0,0,0,.08);
+    }
+    .review-accent { height: 8px; background: #43a047; }
+    .review-body   { padding: 28px 24px 32px; }
+    .review-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 24px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid #e8eaed;
+    }
+    .review-header-icon { font-size: 32px; line-height: 1; }
+    .review-header-text h2 { font-size: 22px; font-weight: 400; color: #202124; }
+    .review-header-text p  { font-size: 13px; color: #5f6368; margin-top: 4px; }
+    .review-section { margin-bottom: 20px; }
+    .review-section:last-child { margin-bottom: 0; }
+    .review-section-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: #80868b;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .review-section-value { font-size: 14px; color: #202124; line-height: 1.7; }
+    .slot-tag {
+      display: inline-block;
+      background: #ede7f6;
+      color: #4a148c;
+      border-radius: 12px;
+      padding: 4px 11px;
+      font-size: 13px;
+      margin: 3px 4px 3px 0;
+    }
+
+    /* ── Footer ─────────────────────────────────────────────── */
+    .footer {
+      text-align: center;
+      margin-top: 28px;
+      font-size: 12px;
+      color: #80868b;
+    }
+    .footer a { color: #673ab7; text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<div class="form-container">
+
+  <!-- ── Header ────────────────────────────────────────────── -->
+  <div class="header-card">
+    <div class="header-accent"></div>
+    <div class="header-body">
+      <h1 class="header-title">MPhil Proposal Meeting — Availability Survey</h1>
+      <div class="header-desc">
+        <p>Dear Professor,</p>
+        <p>
+          I am <strong>Tak Kwan Quentin Lam</strong>. I am writing to invite you to my
+          MPhil proposal presentation and kindly ask for your availability in <strong>June</strong>. Please indicate
+          all the time slots that work for you and your preferred meeting format.
+        </p>
+        <p>Thank you very much for your time and support.</p>
+        <p class="required-note">* Indicates required question</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Error banner ──────────────────────────────────────── -->
+  <div id="error-banner" class="error-banner" role="alert" aria-live="polite"></div>
+
+  <!-- ── Form ──────────────────────────────────────────────── -->
+  <form id="availability-form" novalidate>
+
+    <!-- Q1: Name (pre-filled, read-only) -->
+    <div class="question-card">
+      <label class="question-label" for="respondent-name">
+        1. Your name <span class="required-star" aria-label="required">*</span>
+      </label>
+      <input
+        type="text"
+        id="respondent-name"
+        name="name"
+        class="text-input"
+        readonly
+        tabindex="-1"
+        aria-readonly="true"
+        value="Loading…"
+      />
+      <p class="field-hint">Every committee member has a unique link to ensure their responses are correctly attributed. Please let me know if it's not your link.</p>
+      <div id="unknown-warning" class="unknown-warning" role="alert">
+        ⚠️ This link does not contain a valid recipient identifier. Please use the personalised link sent to you by Tak Kwan Quentin Lam.
+      </div>
+    </div>
+
+    <!-- Q2: Available time slots -->
+    <div class="question-card">
+      <label class="question-label" id="time-label">
+        2. Please select <em>all</em> time slots when you are available for my MPhil proposal meeting
+        <span class="required-star" aria-label="required">*</span>
+      </label>
+      <div class="option-list" id="time-slot-list" role="group" aria-labelledby="time-label">
+        <!-- Populated by JavaScript -->
+      </div>
+    </div>
+
+    <!-- Q3: Online or in person -->
+    <div class="question-card">
+      <label class="question-label" id="format-label">
+        3. Do you prefer the meeting to be online or in person?
+        <span class="required-star" aria-label="required">*</span>
+      </label>
+      <div class="option-list" role="radiogroup" aria-labelledby="format-label">
+        <label class="option-row">
+          <input type="radio" name="meeting_format" value="Online" />
+          <span>Online</span>
+        </label>
+        <label class="option-row">
+          <input type="radio" name="meeting_format" value="In Person" />
+          <span>In Person</span>
+        </label>
+        <label class="option-row">
+          <input type="radio" name="meeting_format" value="No Preference" />
+          <span>No Preference</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <div class="submit-row">
+      <button type="submit" class="submit-btn" id="submit-btn">Submit</button>
+      <button type="button" class="clear-link" onclick="clearForm()">Clear form</button>
+    </div>
+
+  </form>
+
+  <!-- ── Already-submitted / just-submitted review card ──────── -->
+  <div id="review-card" role="region" aria-live="polite">
+    <div class="review-accent"></div>
+    <div class="review-body">
+      <div class="review-header">
+        <div class="review-header-icon" id="review-icon">📋</div>
+        <div class="review-header-text">
+          <h2 id="review-title">Your response has been submitted!</h2>
+          <p id="review-date"></p>
+        </div>
+      </div>
+      <div class="review-section">
+        <div class="review-section-label">Name</div>
+        <div class="review-section-value" id="review-name"></div>
+      </div>
+      <div class="review-section">
+        <div class="review-section-label">Available time slots you selected</div>
+        <div class="review-section-value" id="review-slots"></div>
+      </div>
+      <div class="review-section">
+        <div class="review-section-label">Meeting format preference</div>
+        <div class="review-section-value" id="review-format"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Legacy success card (kept for fallback) ───────────────── -->
+  <div id="success-card" class="success-card" style="display:none" role="region" aria-live="polite">
+    <div class="success-icon">✅</div>
+    <h2 class="success-title">Response submitted!</h2>
+    <p class="success-body" id="success-body"></p>
+  </div>
+
+  <div class="footer">
+    Form created for <strong>Tak Kwan Quentin Lam</strong> · MPhil Proposal Scheduling
+  </div>
+
+</div><!-- /form-container -->
+
+<script>
+  /* ================================================================
+     CONFIGURATION
+     ================================================================ */
+
+  /**
+   * Formspree endpoint — send responses to quentinlampsy@gmail.com
+   *
+   * One-time setup steps:
+   *  1. Go to https://formspree.io and sign up with quentinlampsy@gmail.com
+   *  2. Click "New Form", name it "MPhil Proposal Availability", keep the
+   *     email as quentinlampsy@gmail.com, and click Create.
+   *  3. Copy the endpoint URL shown — it looks like:
+   *       https://formspree.io/f/xyzabcde
+   *  4. Replace the placeholder string below with your real endpoint URL.
+   */
+  const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xpqodrge';
+
+  /** Map from the URL ?p= parameter value to the professor's display name. */
+  const RECIPIENTS = {
+    'urs-maurer':      'Prof. Urs Maurer',
+    'tomohiro-inoue':  'Prof. Tomohiro Inoue',
+    'hon-cheong-so':   'Prof. Hon-Cheong So',
+  };
+
+  /**
+   * Weekday time-slots for June 1–12, 2026 (Mon–Fri, two full weeks).
+   * Note: June 1, 2026 is a Monday; June 12, 2026 is the corresponding Friday.
+   */
+  const TIME_SLOT_DAYS = [
+    { date: 'June 1',  day: 'Monday'    },
+    { date: 'June 2',  day: 'Tuesday'   },
+    { date: 'June 3',  day: 'Wednesday' },
+    { date: 'June 4',  day: 'Thursday'  },
+    { date: 'June 5',  day: 'Friday'    },
+    { date: 'June 8',  day: 'Monday'    },
+    { date: 'June 9',  day: 'Tuesday'   },
+    { date: 'June 10', day: 'Wednesday' },
+    { date: 'June 11', day: 'Thursday'  },
+    { date: 'June 12', day: 'Friday'    },
+  ];
+
+  /* ================================================================
+     INITIALISATION
+     ================================================================ */
+
+  (function init() {
+    buildTimeSlots();
+    prefillName();
+    checkPreviousSubmission();
+  })();
+
+  /* ----------------------------------------------------------------
+     Build the checkbox list for time slots
+  ---------------------------------------------------------------- */
+  function buildTimeSlots() {
+    const container = document.getElementById('time-slot-list');
+
+    TIME_SLOT_DAYS.forEach(({ date, day }) => {
+      // Day header divider
+      const divider = document.createElement('div');
+      divider.className = 'day-divider';
+      divider.textContent = `${date} (${day})`;
+      container.appendChild(divider);
+
+      ['Morning', 'Afternoon'].forEach(period => {
+        const slotValue = `${date}st (${day}) ${period}`;
+        const id = `slot-${date.replace(/\s/g, '')}-${period}`;
+
+        const label = document.createElement('label');
+        label.className = 'option-row';
+        label.htmlFor = id;
+
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.id = id;
+        cb.name = 'time_slots';
+        cb.value = slotValue;
+
+        const span = document.createElement('span');
+        span.textContent = period;
+
+        label.appendChild(cb);
+        label.appendChild(span);
+        container.appendChild(label);
+      });
+    });
+  }
+
+  /* ----------------------------------------------------------------
+     Pre-fill the name field from the URL query parameter
+  ---------------------------------------------------------------- */
+  function prefillName() {
+    const params = new URLSearchParams(window.location.search);
+    const key = params.get('p') || params.get('person') || '';
+    const nameInput = document.getElementById('respondent-name');
+    const warning   = document.getElementById('unknown-warning');
+
+    if (key && RECIPIENTS[key]) {
+      nameInput.value = RECIPIENTS[key];
+    } else {
+      nameInput.value = '';
+      warning.style.display = 'block';
+    }
+  }
+
+  /* ================================================================
+     FORM SUBMISSION
+     ================================================================ */
+
+  document.getElementById('availability-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const errorBanner = document.getElementById('error-banner');
+    errorBanner.style.display = 'none';
+
+    // --- Gather values ---
+    const nameInput    = document.getElementById('respondent-name');
+    const name         = nameInput.value.trim();
+    const selectedSlots = Array.from(
+      document.querySelectorAll('input[name="time_slots"]:checked')
+    ).map(cb => cb.value);
+    const formatRadio  = document.querySelector('input[name="meeting_format"]:checked');
+
+    // --- Validate ---
+    if (!name || !RECIPIENTS[getPersonKey()]) {
+      showError('A valid personalised link is required to submit this form. Please use the link sent to you by Tak Kwan Quentin Lam.');
+      return;
+    }
+    if (selectedSlots.length === 0) {
+      showError('Please select at least one available time slot before submitting.');
+      return;
+    }
+    if (!formatRadio) {
+      showError('Please indicate whether you prefer the meeting to be online or in person.');
+      return;
+    }
+
+    // --- Submit ---
+    const submitBtn = document.getElementById('submit-btn');
+    submitBtn.textContent = 'Submitting…';
+    submitBtn.disabled = true;
+
+    const payload = {
+      _subject:        `[MPhil Proposal] Availability response from ${name}`,
+      respondent:      name,
+      available_slots: selectedSlots.join('; '),
+      meeting_format:  formatRadio.value,
+      submitted_at:    new Date().toISOString(),
+    };
+
+    try {
+      const res = await fetch(FORMSPREE_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `HTTP ${res.status}`);
+      }
+
+      // Persist to localStorage so the link becomes read-only on return visits
+      const submissionData = {
+        name,
+        slots:       selectedSlots,
+        format:      formatRadio.value,
+        submittedAt: new Date().toISOString(),
+      };
+      const personKey = getPersonKey();
+      if (personKey) {
+        try { localStorage.setItem('mphil_submission_' + personKey, JSON.stringify(submissionData)); }
+        catch (e) { /* storage unavailable — not critical */ }
+      }
+
+      // Show the review card (new submission)
+      document.getElementById('availability-form').style.display = 'none';
+      document.getElementById('error-banner').style.display = 'none';
+      showReviewCard(submissionData, true);
+
+    } catch (err) {
+      submitBtn.textContent = 'Submit';
+      submitBtn.disabled = false;
+      showError(
+        'Submission failed — please try again. If the problem persists, contact Tak Kwan Quentin Lam directly.' +
+        (err.message ? ` (${err.message})` : '')
+      );
+    }
+  });
+
+  /* ================================================================
+     HELPERS
+     ================================================================ */
+
+  function getPersonKey() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('p') || params.get('person') || '';
+  }
+
+  /* ----------------------------------------------------------------
+     Check if this person already submitted (localStorage)
+  ---------------------------------------------------------------- */
+  function checkPreviousSubmission() {
+    const key = getPersonKey();
+    if (!key) return;
+    let stored;
+    try { stored = localStorage.getItem('mphil_submission_' + key); }
+    catch (e) { return; }
+    if (!stored) return;
+    try {
+      const data = JSON.parse(stored);
+      document.getElementById('availability-form').style.display = 'none';
+      document.getElementById('error-banner').style.display = 'none';
+      showReviewCard(data, false);
+    } catch (e) { /* corrupted data — let them fill again */ }
+  }
+
+  /* ----------------------------------------------------------------
+     Render the review card with submitted answers
+     isNew = true  → just submitted now
+     isNew = false → returning visit
+  ---------------------------------------------------------------- */
+  function showReviewCard(data, isNew) {
+    const card = document.getElementById('review-card');
+    card.style.display = 'block';
+
+    document.getElementById('review-icon').textContent  = isNew ? '✅' : '📋';
+    document.getElementById('review-title').textContent = isNew
+      ? 'Your response has been submitted!'
+      : 'You have already submitted this form';
+
+    const dateStr = data.submittedAt
+      ? 'Submitted on ' + new Date(data.submittedAt).toLocaleString(undefined, {
+          year: 'numeric', month: 'long', day: 'numeric',
+          hour: '2-digit', minute: '2-digit'
+        })
+      : '';
+    document.getElementById('review-date').textContent = dateStr;
+    document.getElementById('review-name').textContent = data.name || '—';
+
+    const slotsEl = document.getElementById('review-slots');
+    slotsEl.innerHTML = '';
+    if (data.slots && data.slots.length > 0) {
+      data.slots.forEach(slot => {
+        const tag = document.createElement('span');
+        tag.className = 'slot-tag';
+        tag.textContent = slot;
+        slotsEl.appendChild(tag);
+      });
+    } else {
+      slotsEl.textContent = '—';
+    }
+
+    document.getElementById('review-format').textContent = data.format || '—';
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function showError(msg) {
+    const banner = document.getElementById('error-banner');
+    banner.textContent = msg;
+    banner.style.display = 'block';
+    banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function clearForm() {
+    document.querySelectorAll('input[name="time_slots"]').forEach(cb => { cb.checked = false; });
+    document.querySelectorAll('input[name="meeting_format"]').forEach(rb => { rb.checked = false; });
+    document.getElementById('error-banner').style.display = 'none';
+  }
+</script>
+
+</body>
+</html>
